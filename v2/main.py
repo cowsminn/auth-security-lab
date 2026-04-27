@@ -7,6 +7,7 @@ from flask_bcrypt import Bcrypt
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadTimeSignature
+from functools import wraps
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -20,6 +21,7 @@ app.config.update(
 DATABASE = 'v2.db'
 MAX_FAILED_LOGINS = 3
 LOCKOUT_TIME_MINUTES = 10
+LOCKOUT_PERIOD = timedelta(minutes=15)
 
 bcrypt = Bcrypt(app)
 limiter = Limiter(
@@ -28,6 +30,9 @@ limiter = Limiter(
     default_limits=["200 per day", "50 per hour"]
 )
 ts = URLSafeTimedSerializer(app.secret_key)
+
+ip_blacklist = {}
+
 
 def get_db():
     db = getattr(g, '_database', None)
@@ -86,6 +91,16 @@ def is_password_complex(password):
         return False, "Password must contain a special character."
     return True, ""
 
+def check_ip_blocked():
+    client_ip = get_remote_address()
+    if client_ip in ip_blacklist:
+        lockout_until = ip_blacklist[client_ip]
+        if datetime.utcnow() < lockout_until:
+            return True
+        else:
+            ip_blacklist.pop(client_ip, None)
+    return False
+
 @app.route('/')
 def index():
     if 'user_id' in session:
@@ -136,7 +151,9 @@ def register():
 @app.route('/login', methods=['GET', 'POST'])
 @limiter.limit("20 per minute")
 def login():
-    if request.method == 'POST':
+    if check_ip_blocked():
+        flash("Your IP is temporarily blocked due to too many failed login attempts.", 'error')
+    elif request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
         db = get_db()
@@ -166,6 +183,10 @@ def login():
                 if attempts >= MAX_FAILED_LOGINS:
                     lock_time = datetime.utcnow() + timedelta(minutes=LOCKOUT_TIME_MINUTES)
                     db.execute("UPDATE users SET failed_login_attempts = ?, lock_until = ? WHERE id = ?", (attempts, lock_time, user['id']))
+                    
+                    client_ip = get_remote_address()
+                    ip_blacklist[client_ip] = datetime.utcnow() + LOCKOUT_PERIOD
+                    
                     log_audit(user['id'], 'ACCOUNT_LOCKED', ip_address=request.remote_addr)
                 else:
                     db.execute("UPDATE users SET failed_login_attempts = ? WHERE id = ?", (attempts, user['id']))
@@ -213,7 +234,7 @@ def logout():
     return redirect(url_for('login'))
 
 @app.route('/forgot_password', methods=['GET', 'POST'])
-@limiter.limit("3 per minute")
+@limiter.limit("5 per minute")
 def forgot_password():
     if request.method == 'POST':
         email = request.form['email']
@@ -290,4 +311,4 @@ def reset_password(token):
 
 if __name__ == '__main__':
     init_db()
-    app.run(debug=True, port=5001) 
+    app.run(debug=True, port=5001)

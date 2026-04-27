@@ -1,0 +1,16 @@
+# Python virtual environment
+venv/
+
+# SQLite databases
+# *.db
+# *.sqlite3
+
+# IDE/Editor specific files
+.idea/
+.vscode/
+*.swp
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
