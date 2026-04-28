@@ -128,7 +128,7 @@ def register():
             flash("Registration successful! Please log in.", 'success')
             return redirect(url_for('login'))
         except sqlite3.IntegrityError:
-            flash("This email is already registered or an error occurred.", 'error')
+            flash("An error occurred.", 'error')
             return redirect(url_for('register'))
 
     return render_template_string('''
@@ -211,6 +211,7 @@ def login():
             <input type="submit" value="Login">
         </form>
         <p><a href="{{ url_for('forgot_password') }}">Forgot your password?</a></p>
+        <p>Don't have an account? <a href="{{ url_for('register') }}">Register here</a>.</p>
     ''')
 
 @app.route('/dashboard')
