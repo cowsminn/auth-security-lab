@@ -54,6 +54,10 @@ This project uses Flask.
     ```bash
     pip install flask
     ```
+## Video Demonstration
+
+[![demo](https://img.youtube.com/vi/eUc5V2GvTuY/0.jpg)](https://youtu.be/eUc5V2GvTuY)
+
 ## Limitations
 
 1.  **Scope**: This lab focuses solely on SQL injection and does not cover other vulnerabilities.
