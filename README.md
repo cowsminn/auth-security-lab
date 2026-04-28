@@ -56,7 +56,7 @@ This project uses Flask.
     ```
 ## Video Demonstration
 
-[![demo](https://img.youtube.com/vi/eUc5V2GvTuY/0.jpg)](https://youtu.be/eUc5V2GvTuY)
+[![demo](https://img.youtube.com/vi/eUc5V2GvTuY/0.jpg)](https://www.youtube.com/watch?v=GY8J6j5s-wQ)
 
 ## Limitations
 
