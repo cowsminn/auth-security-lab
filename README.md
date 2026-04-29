@@ -29,6 +29,8 @@ This project uses Flask.
 
 ### Setup
 
+#### v1
+
 1.  **Create a virtual environment:**
 
     ```bash
@@ -53,6 +55,34 @@ This project uses Flask.
 
     ```bash
     pip install flask
+    ```
+
+#### v2
+
+1.  **Create a virtual environment:**
+
+    ```bash
+    python3 -m venv venv
+    ```
+
+2.  **Activate the virtual environment:**
+
+    -   On Windows:
+
+        ```bash
+        venv\Scripts\activate
+        ```
+
+    -   On macOS and Linux:
+
+        ```bash
+        source venv/bin/activate
+        ```
+
+3.  **Install dependencies:**
+
+    ```bash
+    pip install flask flask-bcrypt flask-limiter itsdangerous
     ```
 ## Video Demonstration
 
